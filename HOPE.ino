@@ -196,8 +196,19 @@ void loop()
         gps.get_position(&la, &lo, &age);
         Serial.print("La:"); Serial.print(la); 
         Serial.print(",Lo:"); Serial.print(lo);
-        Serial.print(",A:"); Serial.println(gps.altitude()/100);
+        Serial.print(",A:"); Serial.print(gps.altitude()/100);
         
+        // Same goes for date and time
+        int year;
+        byte month, day, hour, minute, second, hundredths;
+        gps.crack_datetime(&year,&month,&day,&hour,&minute,&second,&hundredths);
+        // Print data and time
+        Serial.print(",D:"); Serial.print(month, DEC); Serial.print("/"); 
+        Serial.print(day, DEC); Serial.print("/"); Serial.print(year);
+        Serial.print(",T:"); Serial.print(hour, DEC); Serial.print(":"); 
+        Serial.print(minute, DEC); Serial.print(":"); Serial.print(second, DEC); 
+        Serial.print("."); Serial.println(hundredths, DEC);
+  
         break;
       }
       
@@ -692,7 +703,7 @@ void startXmodemSend(char *p_file)
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
 
- Serial.print("F: "); Serial.println(p_file);
+ Serial.print("F:"); Serial.println(p_file);
  Serial.println("X");    
   delay(3000);
   int j = XSend(&file, &Serial, p_file);
