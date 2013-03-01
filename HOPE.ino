@@ -266,11 +266,18 @@ uart_gps.end();
       strcat(temp_string, "0");
     } 
     strcat(temp_string, itoa(minute, temp_string2, 10));
-
+    
+    
+    int error = 0;
+    Serial.print("F:"); Serial.println(temp_string);
     if (!file.open(temp_string, O_CREAT | O_EXCL | O_WRITE)) {
       Serial.println("E2");
+      error = 1;
     }
     
+    // If no errors above...continue on...
+    if (error == 0)
+    {
       short int l = 1;
       short int m = 1;
       while(!EndFlag)
@@ -318,6 +325,7 @@ uart_gps.end();
       
      // Finish up writing image.
      file.close();
+     if (m >1) Serial.println("");  // Want a new line.
      Serial.println("D");
      lsSendCommand(STOP_TAKING_PICS, 5); 
      
@@ -325,31 +333,26 @@ uart_gps.end();
 
      // Menu.
      long menutimestart = millis();
-     Serial.println(menutimestart);
+     Serial.print("T:"); Serial.println(menutimestart);
      Serial.println("U");
      
      
      while(1) {
-     while (Serial.available() > 0) {
+        while (Serial.available() > 0) {
 
-        // look for the next valid integer in the incoming serial stream:
-        short menuopt = Serial.parseInt(); 
+           // look for the next valid integer in the incoming serial stream:
+           short menuopt = Serial.parseInt(); 
         
-//        if (menuopt == 1) {  
-//          Serial.println("S1");
-//        }
+//           if (menuopt == 1) {  
+//             Serial.println("S1");
+//           }
     
-        if (menuopt == 2) {  
-          startXmodemSend(temp_string);
-        }    
+           if (menuopt == 2) startXmodemSend(temp_string);
     
-     }
-       if (millis() > menutimestart + 10000) {
-         break;
-       }    
+        }
+        if (millis() > menutimestart + 10000) break;
       }  
-     
-
+    }
   }  
 
 
@@ -703,7 +706,7 @@ void startXmodemSend(char *p_file)
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
 
- Serial.print("F:"); Serial.println(p_file);
+ // Serial.print("F:"); Serial.println(p_file);
  Serial.println("X");    
   delay(3000);
   int j = XSend(&file, &Serial, p_file);
