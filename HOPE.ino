@@ -39,6 +39,8 @@ const short ls_tx = 7;
 const short gps_rx = 2;
 const short gps_tx = 3;
 
+const short status_led = 4;
+
 const short tmp_data_pin = 9;
 
 // All I2C is through A4 and A5, but for the rtc, we specify it for this board
@@ -80,7 +82,6 @@ const char START_READ_TWO[6] =   {0x00, 0x00, 0x00, 0x20, 0x00, 0x0a};
 byte lsData[32];
 
 //SD Set-up
-// File dataFile;
 SdCard card;
 Fat16 file;
 
@@ -116,15 +117,19 @@ void setup()
   // Initialise I2O
   Wire.begin();
   
+  pinMode(status_led, OUTPUT); 
+  
   // initialize the SD card - CANNOT be SDHC card...must be older type <= 2GB
   if (!card.init()) {
     Serial.println("E0");
+    flash_led();   
     return;
   }    
   
   // initialize a FAT16 volume
   if (!Fat16::init(&card)) {
     Serial.println("E1");
+    flash_led();
     return;
   }
 
@@ -140,7 +145,7 @@ void setup()
   pinMode(ls_rx, INPUT);
   pinMode(ls_tx, OUTPUT);
   lsSendCommand(RESET_CAMERA, 4);
-  delay(4000);                               //After reset, wait 2-3 second to send take picture command  
+  delay(4000);                // After reset, wait 4 second to ensure reset is complete.  
 
  
   // Change camera speed...slow camera down...else pictures become corrupted
@@ -150,19 +155,14 @@ void setup()
   delay(100);  
   
 
-
-
-// Initialise Hardware Serial ports for GPS
-// No config required.
-
-
 // Initialise BMP085 Air pressure sensor
   bmp085Calibration();
   
   
 // Output status - via LED
   Serial.print("G"); 
-  Serial.println(FreeRam(), DEC);
+  // Serial.println(FreeRam(), DEC);
+  digitalWrite(status_led, HIGH);
 
 }
 
@@ -184,7 +184,6 @@ void loop()
     while(uart_gps.available())     // While there is data on the RX pin...
     {
       int c = uart_gps.read();    // load the data into a variable...
-      
       
       if(gps.encode(c))      // if there is a new valid sentence...
       {
@@ -222,7 +221,7 @@ uart_gps.end();
 
   
   
-  // Take a picture
+  // Take a picture...if it time to do this.
   lsSerial.listen();
   ++picture_freq;
   if (picture_freq > 5)
@@ -329,7 +328,6 @@ uart_gps.end();
      Serial.println("D");
      lsSendCommand(STOP_TAKING_PICS, 5); 
      
-   
 
      // Menu.
      long menutimestart = millis();
@@ -718,3 +716,13 @@ void startXmodemSend(char *p_file)
 
 }
 
+void flash_led()
+{
+    while(1)
+    {
+      digitalWrite(status_led, HIGH);
+      delay(500); 
+      digitalWrite(status_led, LOW);
+      delay(500);       
+    } 
+}
