@@ -39,7 +39,7 @@ const short ls_tx = 7;
 const short gps_rx = 2;
 const short gps_tx = 3;
 
-const short status_led = 4;
+const short status_led = 5;
 
 const short tmp_data_pin = 9;
 
@@ -117,7 +117,7 @@ void setup()
   // Initialise I2O
   Wire.begin();
   
-  pinMode(status_led, OUTPUT); 
+  pinMode(status_led, OUTPUT);   
   
   // initialize the SD card - CANNOT be SDHC card...must be older type <= 2GB
   if (!card.init()) {
@@ -207,6 +207,24 @@ void loop()
         Serial.print(",T:"); Serial.print(hour, DEC); Serial.print(":"); 
         Serial.print(minute, DEC); Serial.print(":"); Serial.print(second, DEC); 
         Serial.print("."); Serial.println(hundredths, DEC);
+        
+        // Write to a file
+        if (file.open("measure.txt", O_CREAT | O_APPEND | O_WRITE)) {
+          file.write("La:");  file.print(la, DEC); 
+          file.write(",Lo:"); file.print(lo, DEC);
+          file.write(",A:");  file.print(gps.altitude()/100, DEC);
+        
+          file.write(",D:"); file.print(month, DEC); file.write("/"); 
+          file.print(day, DEC); file.write("/"); file.print(year, DEC);
+          file.write(",T:"); file.print(hour, DEC); file.write(":"); 
+          file.print(minute, DEC); file.write(":"); file.print(second, DEC); 
+          file.write("."); file.print(hundredths, DEC);  
+
+          file.write("\r\n\r\n");          
+          file.close();
+        }
+        
+        
   
         break;
       }
@@ -368,6 +386,26 @@ uart_gps.end();
   Serial.print(","); // Serial.println(temperature*0.1);  
   Serial.println(itoa(temperature, temp_string,10));
   
+ // Derive full path from date/time  - format is MMDDHHMM
+ readDS3232time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);  
+  
+ // Write to a file
+ if (file.open("measure.txt", O_CREAT | O_APPEND | O_WRITE)) {
+   // Write date/time first
+   file.write("D:"); file.print(month, DEC); file.write("/"); 
+   file.print(dayOfMonth, DEC); file.write("/"); file.print(year, DEC);
+   file.write(",T:"); file.print(hour, DEC); file.write(":"); 
+   file.print(minute, DEC); file.write(":"); file.print(second, DEC); 
+   
+   file.write("\r\n\r\n");     
+   
+   // Write other measurements
+   file.write("M:");  file.print((long) pressure, DEC); 
+   file.write(",T:"); file.write(itoa(getECurrentTemp(), temp_string, 10)); 
+   file.write(",");   file.write(itoa(temperature, temp_string,10)); 
+   file.write("\r\n\r\n");   
+   file.close();
+ }  
   
   // Delay between going back to beginning.
   Serial.println("H");
