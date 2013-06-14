@@ -1,3 +1,5 @@
+#include <LiquidCrystal.h>
+
 /*
  * Name:  HOPE
  * Author: Joseph Turner <joeman@leederville.net>
@@ -99,6 +101,8 @@ byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
 // Misc variables
 char temp_string[15];
 char temp_string2[3];
+
+short int pskip = 15; // How many iterations before we take a pic.
 
 
 // LinkSprite Camera
@@ -209,7 +213,7 @@ void loop()
         Serial.print("."); Serial.println(hundredths, DEC);
         
         // Write to a file
-        if (file.open("measure.txt", O_CREAT | O_APPEND | O_WRITE)) {
+        if (file.open("m", O_CREAT | O_APPEND | O_WRITE)) {
           file.write("La:");  file.print(la, DEC); 
           file.write(",Lo:"); file.print(lo, DEC);
           file.write(",A:");  file.print(gps.altitude()/100, DEC);
@@ -222,6 +226,8 @@ void loop()
 
           file.write("\r\n\r\n");          
           file.close();
+        } else {
+          Serial.println("E3");
         }
         
         
@@ -242,7 +248,7 @@ uart_gps.end();
   // Take a picture...if it time to do this.
   lsSerial.listen();
   ++picture_freq;
-  if (picture_freq > 5)
+  if (picture_freq > pskip)
   {   
     // Indicate that we are about take a picture...delay expected.
     Serial.println("C");
@@ -359,10 +365,18 @@ uart_gps.end();
            // look for the next valid integer in the incoming serial stream:
            short menuopt = Serial.parseInt(); 
         
-//           if (menuopt == 1) {  
-//             Serial.println("S1");
-//           }
+           // Reduce # of pics taken significantly
+           if (menuopt == 1) { 
+             pskip = 500;
+             Serial.println("T");  // Indicates more of a testing phase...less pics
+           }
     
+           // Set # of iterations before pics back to normal.
+           if (menuopt == 3) {  
+             pskip = 15;
+             Serial.println("N");  // Indicates more of a normal phase.
+           }
+           
            if (menuopt == 2) startXmodemSend(temp_string);
     
         }
@@ -390,7 +404,7 @@ uart_gps.end();
  readDS3232time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);  
   
  // Write to a file
- if (file.open("measure.txt", O_CREAT | O_APPEND | O_WRITE)) {
+ if (file.open("m", O_CREAT | O_APPEND | O_WRITE)) {
    // Write date/time first
    file.write("D:"); file.print(month, DEC); file.write("/"); 
    file.print(dayOfMonth, DEC); file.write("/"); file.print(year, DEC);
@@ -405,7 +419,9 @@ uart_gps.end();
    file.write(",");   file.write(itoa(temperature, temp_string,10)); 
    file.write("\r\n\r\n");   
    file.close();
- }  
+ } else {
+   Serial.println("E4");
+ }
   
   // Delay between going back to beginning.
   Serial.println("H");
