@@ -53,6 +53,7 @@ const short tmp_data_pin = 9;
 #define BMP085_ADDRESS 0x77  // I2C address of BMP085
 const unsigned char OSS = 0;  // Oversampling Setting
 
+
 // Calibration values
 int ac1,ac2,ac3;
 unsigned int ac4,ac5,ac6;
@@ -103,7 +104,7 @@ char temp_string[15];
 char temp_string2[3];
 
 short int pskip = 15; // How many iterations before we take a pic.
-
+int heartbeat = 1;
 
 // LinkSprite Camera
 void SendReadDataCmd();
@@ -424,7 +425,9 @@ uart_gps.end();
  }
   
   // Delay between going back to beginning.
-  Serial.println("H");
+  Serial.print("H:");
+  Serial.println(heartbeat);
+  ++heartbeat;
   
   delay(1000);  
  
