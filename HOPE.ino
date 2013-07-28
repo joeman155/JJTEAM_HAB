@@ -1,5 +1,3 @@
-#include <LiquidCrystal.h>
-
 /*
  * Name:  HOPE
  * Author: Joseph Turner <joeman@leederville.net>
@@ -113,8 +111,14 @@ void setCameraSpeed(uint8_t high_b, uint8_t low_b);
 
 void setup()
 { 
+  // Wait 3 seconds for the Serial modem to initialise...
+  delay(3000); 
+  
   // Initialise the Xbee Serial Port
-  Serial.begin(9600);
+  Serial.begin(57600);
+  
+  // Wait another 3 seconds for the Serial modem to initialise...
+  delay(3000);   
 
   // inidicates that program has started.
   Serial.println("S"); 
