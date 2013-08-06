@@ -41,6 +41,8 @@ const short gps_tx = 3;
 
 const short status_led = 5;
 
+const short cutdown_pin =6;
+
 const short tmp_data_pin = 9;
 
 // All I2C is through A4 and A5, but for the rtc, we specify it for this board
@@ -111,11 +113,14 @@ void setCameraSpeed(uint8_t high_b, uint8_t low_b);
 
 void setup()
 { 
+  pinMode(status_led, OUTPUT);
+  pinMode(cutdown_pin, OUTPUT);  
+  
   // Wait 3 seconds for the Serial modem to initialise...
   delay(3000); 
   
   // Initialise the Xbee Serial Port
-  Serial.begin(57600);
+  Serial.begin(9600);
   
   // Wait another 3 seconds for the Serial modem to initialise...
   delay(3000);   
@@ -125,8 +130,9 @@ void setup()
   
   // Initialise I2O
   Wire.begin();
-  
-  pinMode(status_led, OUTPUT);   
+    
+  // Testing pin - remove later on
+  // digitalWrite(cutdown_pin, HIGH);
   
   // initialize the SD card - CANNOT be SDHC card...must be older type <= 2GB
   if (!card.init()) {
@@ -363,6 +369,7 @@ uart_gps.end();
      Serial.print("T:"); Serial.println(menutimestart);
      Serial.println("U");
      
+     Serial.flush();
      
      while(1) {
         while (Serial.available() > 0) {
@@ -374,18 +381,23 @@ uart_gps.end();
            if (menuopt == 1) { 
              pskip = 500;
              Serial.println("T");  // Indicates more of a testing phase...less pics
-           }
-    
-           // Set # of iterations before pics back to normal.
-           if (menuopt == 3) {  
+           } else if (menuopt == 3) {  
+             // Set # of iterations before pics back to normal.
              pskip = 15;
              Serial.println("N");  // Indicates more of a normal phase.
+           } else if (menuopt == 2) {
+             startXmodemSend(temp_string);
+           } else {
+             // did not recognise what was sent
+             Serial.println("Q");
            }
-           
-           if (menuopt == 2) startXmodemSend(temp_string);
+        
     
         }
-        if (millis() > menutimestart + 10000) break;
+        if (millis() > menutimestart + 10000) {
+          Serial.println("W");
+          break;
+        }
       }  
     }
   }  
