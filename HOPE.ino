@@ -42,6 +42,7 @@ const short gps_tx = 3;
 const short status_led = 5;
 
 const short cutdown_pin =6;
+const long cutdown_altitude = 25000;
 
 const short tmp_data_pin = 9;
 
@@ -241,6 +242,10 @@ void loop()
           Serial.println("E3");
         }
         
+        if (gps.altitude()/100 > cutdown_altitude) {
+          digitalWrite(cutdown_pin, HIGH);
+          Serial.println("B");
+        }
         
   
         break;
@@ -385,6 +390,10 @@ uart_gps.end();
              // Set # of iterations before pics back to normal.
              pskip = 15;
              Serial.println("N");  // Indicates more of a normal phase.
+           } else if (menuopt == 4) {  
+             // Cutdown initiated!
+             Serial.println("B");  // Indicates more of a normal phase.             
+             digitalWrite(cutdown_pin, HIGH);
            } else if (menuopt == 2) {
              startXmodemSend(temp_string);
            } else {
