@@ -42,9 +42,11 @@ const short gps_tx = 3;
 const short status_led = 5;
 
 const short cutdown_pin =6;
-const long cutdown_altitude = 25000;
+//const long cutdown_altitude = 25000;
 
 const short tmp_data_pin = 9;
+
+//const int voltagePin = A1;  // Analog input pin that the voltage is measured
 
 // All I2C is through A4 and A5, but for the rtc, we specify it for this board
 // We have a BMP085 pressure sensor also connected to these pins
@@ -65,7 +67,7 @@ long b5;
 short temperature;
 float pressure;
 
-
+short unsigned int i;
 
 // CAMERA
 byte incomingbyte;
@@ -104,8 +106,8 @@ byte second, minute, hour, dayOfWeek, dayOfMonth, month, year;
 char temp_string[15];
 char temp_string2[3];
 
-short int pskip = 15; // How many iterations before we take a pic.
-int heartbeat = 1;
+short unsigned int pskip = 15; // How many iterations before we take a pic.
+unsigned int heartbeat = 1;
 
 // LinkSprite Camera
 void SendReadDataCmd();
@@ -114,11 +116,14 @@ void setCameraSpeed(uint8_t high_b, uint8_t low_b);
 
 void setup()
 { 
+  // Pin Settings
+  analogReference(EXTERNAL);
   pinMode(status_led, OUTPUT);
   pinMode(cutdown_pin, OUTPUT);  
+
   
   // Wait 3 seconds for the Serial modem to initialise...
-  delay(3000); 
+  delay(4000); 
   
   // Initialise the Xbee Serial Port
   Serial.begin(9600);
@@ -176,7 +181,7 @@ void setup()
   
   
 // Output status - via LED
-  Serial.print("G"); 
+  Serial.println("G"); 
   // Serial.println(FreeRam(), DEC);
   digitalWrite(status_led, HIGH);
 
@@ -192,7 +197,7 @@ void loop()
   delay(100);  
   
   uart_gps.listen();
-  short unsigned int i = 0;  // Used to wait listening for gps info...else we miss results.
+  i = 0;  // Used to wait listening for gps info...else we miss results.
   while(i < 100)
   {
     delay(25);
@@ -242,10 +247,13 @@ void loop()
           Serial.println("E3");
         }
         
-        if (gps.altitude()/100 > cutdown_altitude) {
-          digitalWrite(cutdown_pin, HIGH);
-          Serial.println("B");
-        }
+        // So long as altitude isn't 1000000 which indicates invalid reading, test if at cutdown altitude.
+        //if (gps.altitude()/100 != 1000000) {
+        //  if (gps.altitude()/100 > cutdown_altitude ) {
+        //    digitalWrite(cutdown_pin, HIGH);
+        //    Serial.println("B");
+        //  }
+        //}
         
   
         break;
@@ -416,18 +424,23 @@ uart_gps.end();
   temperature = bmp085GetTemperature(bmp085ReadUT()); 
   pressure = bmp085GetPressure(bmp085ReadUP());  
 
-  // M =measurements...pressure, external temp, internal temp.
+  // M =measurements...pressure, external temp, internal temp, voltage
   Serial.print("M");  // Serial.print(pressure);
   Serial.print((long) pressure, DEC);
   
   // Get outside temperature reading
   Serial.print(","); Serial.print(itoa(getECurrentTemp(), temp_string, 10));
   
-  Serial.print(","); // Serial.println(temperature*0.1);  
-  Serial.println(itoa(temperature, temp_string,10));
+  // Get internal temp  
+  Serial.print(","); Serial.print(itoa(temperature, temp_string,10));
   
- // Derive full path from date/time  - format is MMDDHHMM
- readDS3232time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);  
+  // Get voltage 
+  Serial.print(","); Serial.println(itoa(analogRead(A1), temp_string,10)); 
+  
+  
+  
+  // Derive full path from date/time  - format is MMDDHHMM
+  readDS3232time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);  
   
  // Write to a file
  if (file.open("m", O_CREAT | O_APPEND | O_WRITE)) {
@@ -450,8 +463,7 @@ uart_gps.end();
  }
   
   // Delay between going back to beginning.
-  Serial.print("H:");
-  Serial.println(heartbeat);
+  Serial.print("H:"); Serial.println(itoa(heartbeat, temp_string, 10));
   ++heartbeat;
   
   delay(1000);  
