@@ -68,6 +68,8 @@ short temperature;
 float pressure;
 
 short unsigned int i;
+unsigned long ulCur;
+boolean error;
 
 // CAMERA
 byte incomingbyte;
@@ -121,6 +123,7 @@ void setup()
   pinMode(status_led, OUTPUT);
   pinMode(cutdown_pin, OUTPUT);  
 
+  digitalWrite(status_led, LOW);
   
   // Wait 3 seconds for the Serial modem to initialise...
   delay(4000); 
@@ -142,15 +145,13 @@ void setup()
   
   // initialize the SD card - CANNOT be SDHC card...must be older type <= 2GB
   if (!card.init()) {
-    Serial.println("E0");
-    flash_led();   
+    Serial.println("E0"); 
     return;
   }    
   
   // initialize a FAT16 volume
   if (!Fat16::init(&card)) {
     Serial.println("E1");
-    flash_led();
     return;
   }
 
@@ -315,18 +316,19 @@ uart_gps.end();
     strcat(temp_string, itoa(minute, temp_string2, 10));
     
     
-    int error = 0;
+    error = false;
     Serial.print("F:"); Serial.println(temp_string);
     if (!file.open(temp_string, O_CREAT | O_EXCL | O_WRITE)) {
       Serial.println("E2");
-      error = 1;
+      error = true;
     }
     
     // If no errors above...continue on...
-    if (error == 0)
+    if (!error )
     {
       short int l = 1;
       short int m = 1;
+      ulCur = millis();
       while(!EndFlag)
       {  
          j=0;
@@ -334,6 +336,13 @@ uart_gps.end();
          count=0;
          SendReadDataCmd();
 
+         // Exit if we can't get pic within 90 seconds...this occurs if a problem with camera
+         // or camera not plugged in properly
+         if((millis() - ulCur) > (unsigned long)(90000)) // 90,000 milli seconds == 90 seconds
+         {
+            Serial.println("E5");
+            break; // took too long, I'm going now
+         }
          delay(25);
          
           while(lsSerial.available()>0)
@@ -378,8 +387,8 @@ uart_gps.end();
      
 
      // Menu.
-     long menutimestart = millis();
-     Serial.print("T:"); Serial.println(menutimestart);
+     ulCur = millis();
+     Serial.print("T:"); Serial.println(ulCur);
      Serial.println("U");
      
      Serial.flush();
@@ -409,9 +418,8 @@ uart_gps.end();
              Serial.println("Q");
            }
         
-    
         }
-        if (millis() > menutimestart + 10000) {
+        if (millis() > ulCur + 10000) {
           Serial.println("W");
           break;
         }
@@ -810,13 +818,4 @@ void startXmodemSend(char *p_file)
 
 }
 
-void flash_led()
-{
-    while(1)
-    {
-      digitalWrite(status_led, HIGH);
-      delay(500); 
-      digitalWrite(status_led, LOW);
-      delay(500);       
-    } 
-}
+
