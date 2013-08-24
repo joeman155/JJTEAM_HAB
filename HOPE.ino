@@ -421,6 +421,7 @@ uart_gps.end();
              EndFlag = 1;             
            } else if (menuopt == 2) {
              startXmodemSend(temp_string);
+             EndFlag = 1; 
            } else {
              // did not recognise what was sent
              Serial.println("Q");
