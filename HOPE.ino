@@ -46,8 +46,6 @@ const short cutdown_pin =6;
 
 const short tmp_data_pin = 9;
 
-//const int voltagePin = A1;  // Analog input pin that the voltage is measured
-
 // All I2C is through A4 and A5, but for the rtc, we specify it for this board
 // We have a BMP085 pressure sensor also connected to these pins
 
@@ -139,9 +137,6 @@ void setup()
   
   // Initialise I2O
   Wire.begin();
-    
-  // Testing pin - remove later on
-  // digitalWrite(cutdown_pin, HIGH);
   
   // initialize the SD card - CANNOT be SDHC card...must be older type <= 2GB
   if (!card.init()) {
@@ -393,7 +388,15 @@ uart_gps.end();
      
      Serial.flush();
      
-     while(1) {
+     EndFlag = 0;
+     while(!EndFlag) {
+       
+       // If we exceed time limit...exit.
+        if (millis() > ulCur + 10000) {
+          Serial.println("W");
+          break;
+        }
+        
         while (Serial.available() > 0) {
 
            // look for the next valid integer in the incoming serial stream:
@@ -403,14 +406,17 @@ uart_gps.end();
            if (menuopt == 1) { 
              pskip = 500;
              Serial.println("T");  // Indicates more of a testing phase...less pics
+             EndFlag = 1;
            } else if (menuopt == 3) {  
              // Set # of iterations before pics back to normal.
              pskip = 15;
              Serial.println("N");  // Indicates more of a normal phase.
+             EndFlag = 1;             
            } else if (menuopt == 4) {  
              // Cutdown initiated!
              Serial.println("B");  // Indicates more of a normal phase.             
              digitalWrite(cutdown_pin, HIGH);
+             EndFlag = 1;             
            } else if (menuopt == 2) {
              startXmodemSend(temp_string);
            } else {
@@ -418,10 +424,6 @@ uart_gps.end();
              Serial.println("Q");
            }
         
-        }
-        if (millis() > ulCur + 10000) {
-          Serial.println("W");
-          break;
         }
       }  
     }
