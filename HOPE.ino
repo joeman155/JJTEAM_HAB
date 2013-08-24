@@ -225,6 +225,8 @@ void loop()
         Serial.print(minute, DEC); Serial.print(":"); Serial.print(second, DEC); 
         Serial.print("."); Serial.println(hundredths, DEC);
         
+        delay(1000);
+        
         // Write to a file
         if (file.open("m", O_CREAT | O_APPEND | O_WRITE)) {
           file.write("La:");  file.print(la, DEC); 
@@ -447,7 +449,7 @@ uart_gps.end();
   // Get voltage 
   Serial.print(","); Serial.println(itoa(analogRead(A1), temp_string,10)); 
   
-  
+  delay(1000);
   
   // Derive full path from date/time  - format is MMDDHHMM
   readDS3232time(&second, &minute, &hour, &dayOfWeek, &dayOfMonth, &month, &year);  
