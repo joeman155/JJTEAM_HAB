@@ -69,6 +69,13 @@ short unsigned int i;
 unsigned long ulCur;
 boolean error;
 
+// Variables used in interpreting menu operations
+char inByte;
+unsigned short int recognised_selection;
+        // 0 = nothing entered
+        // 1 = entered and recognised option
+        // 2 = entered and NOT recognised
+
 // CAMERA
 byte incomingbyte;
 SoftwareSerial lsSerial =  SoftwareSerial(ls_rx,ls_tx);  //Configure pin 4 and 5 as soft serial port
@@ -127,7 +134,7 @@ void setup()
   delay(4000); 
   
   // Initialise the Xbee Serial Port
-  Serial.begin(9600);
+  Serial.begin(57600);
   
   // Wait another 3 seconds for the Serial modem to initialise...
   delay(3000);   
@@ -391,16 +398,28 @@ uart_gps.end();
      Serial.flush();
      
      EndFlag = 0;
+     recognised_selection = 0;
+        
      while(!EndFlag) {
        
        // If we exceed time limit...exit.
         if (millis() > ulCur + 10000) {
-          Serial.println("W");
+          // If not selection...pass output back to GroundStation
+          if (recognised_selection == 0) {
+              Serial.println("W");
+          } else if (recognised_selection == 2) {
+             // no good selection made during display of menu....indicate this and show last selection.
+             Serial.print("Q:");
+             Serial.println(inByte);
+          }            
           break;
         }
         
-        while (Serial.available() > 0) {
 
+        while (Serial.available() > 0) {
+           // This is more for debugging purposes...so we can show last menu option pressed.
+           inByte = Serial.peek();
+           
            // look for the next valid integer in the incoming serial stream:
            short menuopt = Serial.parseInt(); 
         
@@ -408,23 +427,27 @@ uart_gps.end();
            if (menuopt == 1) { 
              pskip = 500;
              Serial.println("T");  // Indicates more of a testing phase...less pics
+             recognised_selection = 1;
              EndFlag = 1;
            } else if (menuopt == 3) {  
              // Set # of iterations before pics back to normal.
              pskip = 15;
              Serial.println("N");  // Indicates more of a normal phase.
+             recognised_selection = 1;
              EndFlag = 1;             
            } else if (menuopt == 4) {  
              // Cutdown initiated!
+             recognised_selection = 1;             
              Serial.println("B");  // Indicates more of a normal phase.             
              digitalWrite(cutdown_pin, HIGH);
-             EndFlag = 1;             
+             EndFlag = 1;
            } else if (menuopt == 2) {
+             recognised_selection = 1;             
              startXmodemSend(temp_string);
              EndFlag = 1; 
            } else {
-             // did not recognise what was sent
-             Serial.println("Q");
+             // did not recognise what was sent...that is ok...give user option to try again...don't send anything back JUST yet.
+             recognised_selection = 2;
            }
         
         }
@@ -476,10 +499,13 @@ uart_gps.end();
  }
   
   // Delay between going back to beginning.
+  delay(500);     // Give time for ground station to catch up
   Serial.print("H:"); Serial.println(itoa(heartbeat, temp_string, 10));
   ++heartbeat;
   
-  delay(1000);  
+  // give ground station time to get stats on link.
+  Serial.flush();
+  delay(5000);  
  
 }
 
