@@ -429,6 +429,10 @@ uart_gps.end();
              Serial.println("T");  // Indicates more of a testing phase...less pics
              recognised_selection = 1;
              EndFlag = 1;
+           } else if (menuopt == 9) {  
+             Serial.println("K");  // Indicates we exit the menu
+             recognised_selection = 1;
+             EndFlag = 1;                 
            } else if (menuopt == 3) {  
              // Set # of iterations before pics back to normal.
              pskip = 15;
