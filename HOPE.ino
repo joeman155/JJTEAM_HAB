@@ -42,7 +42,7 @@ const short gps_tx = 3;
 const short status_led = 5;
 
 const short cutdown_pin =6;
-//const long cutdown_altitude = 25000;
+const long cutdown_altitude = 25000;
 
 const short tmp_data_pin = 9;
 
@@ -122,7 +122,7 @@ void setCameraSpeed(uint8_t high_b, uint8_t low_b);
 
 
 void setup()
-{ 
+{  
   // Pin Settings
   analogReference(EXTERNAL);
   pinMode(status_led, OUTPUT);
@@ -133,8 +133,8 @@ void setup()
   // Wait 3 seconds for the Serial modem to initialise...
   delay(4000); 
   
-  // Initialise the Xbee Serial Port
-  Serial.begin(57600);
+  // Initialise the Radio Serial Port
+  Serial.begin(9600);
   
   // Wait another 3 seconds for the Serial modem to initialise...
   delay(3000);   
@@ -194,7 +194,6 @@ void setup()
 void loop()
 { 
  
-
 // Initialise GPS
   uart_gps.begin(GPSBAUD);
   delay(100);  
@@ -253,12 +252,12 @@ void loop()
         }
         
         // So long as altitude isn't 1000000 which indicates invalid reading, test if at cutdown altitude.
-        //if (gps.altitude()/100 != 1000000) {
-        //  if (gps.altitude()/100 > cutdown_altitude ) {
-        //    digitalWrite(cutdown_pin, HIGH);
-        //    Serial.println("B");
-        //  }
-        //}
+        if (gps.altitude()/100 != 1000000) {
+          if (gps.altitude()/100 > cutdown_altitude ) {
+            digitalWrite(cutdown_pin, HIGH);
+            Serial.println("B");
+          }
+        }
         
   
         break;
@@ -268,9 +267,6 @@ void loop()
   ++i;
   }
 uart_gps.end();
-
-
-
 
   
   
@@ -509,7 +505,7 @@ uart_gps.end();
   
   // give ground station time to get stats on link.
   Serial.flush();
-  delay(5000);  
+  delay(2000);  
  
 }
 
