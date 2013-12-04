@@ -435,10 +435,10 @@ uart_gps.end();
              Serial.println("T");  // Indicates more of a testing phase...less pics
              recognised_selection = 1;
              EndFlag = 1;
-           } else if (menuopt == 9) {  
-             Serial.println("K");  // Indicates we exit the menu
-             recognised_selection = 1;
-             EndFlag = 1;                 
+           } else if (menuopt == 2 && picture_taken == true) {
+             recognised_selection = 1;             
+             startXmodemSend(temp_string);
+             EndFlag = 1; 
            } else if (menuopt == 3) {  
              // Set # of iterations before pics back to normal.
              pskip = 15;
@@ -451,10 +451,10 @@ uart_gps.end();
              Serial.println("B");  // Indicates more of a normal phase.             
              digitalWrite(cutdown_pin, HIGH);
              EndFlag = 1;
-           } else if (menuopt == 2 && picture_taken == true) {
-             recognised_selection = 1;             
-             startXmodemSend(temp_string);
-             EndFlag = 1; 
+           } else if (menuopt == 9) {  
+             Serial.println("K");  // Indicates we exit the menu
+             recognised_selection = 1;
+             EndFlag = 1;                 
            } else {
              // did not recognise what was sent...that is ok...give user option to try again...don't send anything back JUST yet.
              recognised_selection = 2;
@@ -506,13 +506,13 @@ uart_gps.end();
  }
   
   // Delay between going back to beginning.
-  delay(3000);     // Give time for ground station to catch up
+  delay(1000);     // Give time for ground station to catch up
   Serial.print("H:"); Serial.println(itoa(heartbeat, temp_string, 10));
   ++heartbeat;
   
   // give ground station time to get stats on link.
   Serial.flush();
-  delay(2000);  
+  delay(4000);  
  
 }
 
