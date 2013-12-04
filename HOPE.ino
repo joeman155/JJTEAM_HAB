@@ -114,6 +114,7 @@ char temp_string[15];
 char temp_string2[3];
 
 short unsigned int pskip = 15; // How many iterations before we take a pic.
+boolean picture_taken = false;
 unsigned int heartbeat = 1;
 
 // LinkSprite Camera
@@ -271,6 +272,7 @@ uart_gps.end();
   
   
   // Take a picture...if it time to do this.
+  picture_taken = false;
   lsSerial.listen();
   ++picture_freq;
   if (picture_freq > pskip)
@@ -384,12 +386,20 @@ uart_gps.end();
      if (m >1) Serial.println("");  // Want a new line.
      Serial.println("D");
      lsSendCommand(STOP_TAKING_PICS, 5); 
+     picture_taken = true;
      
+    }
+  }  
+
 
      // Menu.
      ulCur = millis();
      Serial.print("T:"); Serial.println(ulCur);
-     Serial.println("U");
+     if (picture_taken == true) {
+       Serial.println("UI");   // Means option 2 is available - to download an image
+     } else {
+       Serial.println("U");    // Means just offer menu...no image to download....
+     }
      
      Serial.flush();
      
@@ -441,7 +451,7 @@ uart_gps.end();
              Serial.println("B");  // Indicates more of a normal phase.             
              digitalWrite(cutdown_pin, HIGH);
              EndFlag = 1;
-           } else if (menuopt == 2) {
+           } else if (menuopt == 2 && picture_taken == true) {
              recognised_selection = 1;             
              startXmodemSend(temp_string);
              EndFlag = 1; 
@@ -451,10 +461,7 @@ uart_gps.end();
            }
         
         }
-      }  
-    }
-  }  
-
+      }
 
   // Get Air pressure information and internal temperature
   temperature = bmp085GetTemperature(bmp085ReadUT()); 
@@ -499,7 +506,7 @@ uart_gps.end();
  }
   
   // Delay between going back to beginning.
-  delay(500);     // Give time for ground station to catch up
+  delay(3000);     // Give time for ground station to catch up
   Serial.print("H:"); Serial.println(itoa(heartbeat, temp_string, 10));
   ++heartbeat;
   
