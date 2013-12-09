@@ -216,7 +216,11 @@ void loop()
         
         long lo, la;
         unsigned long age;
+	unsigned long speed, course;
         gps.get_position(&la, &lo, &age);
+	speed = gps.get_speed();
+	course = gps.get_course();
+
         Serial.print("La:"); Serial.print(la); 
         Serial.print(",Lo:"); Serial.print(lo);
         Serial.print(",A:"); Serial.print(gps.altitude()/100);
@@ -230,7 +234,9 @@ void loop()
         Serial.print(day, DEC); Serial.print("/"); Serial.print(year);
         Serial.print(",T:"); Serial.print(hour, DEC); Serial.print(":"); 
         Serial.print(minute, DEC); Serial.print(":"); Serial.print(second, DEC); 
-        Serial.print("."); Serial.println(hundredths, DEC);
+        Serial.print("."); Serial.print(hundredths, DEC);
+	Serial.print(",S:"); Serial.print(speed, DEC);
+	Serial.print(",C:"); Serial.println(course, DEC);
         
         delay(1000);
         
@@ -245,6 +251,9 @@ void loop()
           file.write(",T:"); file.print(hour, DEC); file.write(":"); 
           file.print(minute, DEC); file.write(":"); file.print(second, DEC); 
           file.write("."); file.print(hundredths, DEC);  
+
+	  file.write(",S:"); file.print(speed, DEC);
+	  file.write(",C:"); file.print(course, DEC);
 
           file.write("\r\n\r\n");          
           file.close();
