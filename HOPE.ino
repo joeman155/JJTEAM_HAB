@@ -218,8 +218,8 @@ void loop()
         unsigned long age;
 	unsigned long speed, course;
         gps.get_position(&la, &lo, &age);
-	speed = gps.get_speed();
-	course = gps.get_course();
+	speed = gps.f_speed_kmph();
+	course = gps.f_course();
 
         Serial.print("La:"); Serial.print(la); 
         Serial.print(",Lo:"); Serial.print(lo);
