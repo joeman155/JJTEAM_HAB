@@ -43,6 +43,7 @@ const short status_led = 5;
 
 const short cutdown_pin =6;
 const long cutdown_altitude = 25000;
+const long cutdown_delay = 10000;
 
 const short tmp_data_pin = 9;
 
@@ -264,8 +265,10 @@ void loop()
         // So long as altitude isn't 1000000 which indicates invalid reading, test if at cutdown altitude.
         if (gps.altitude()/100 != 1000000) {
           if (gps.altitude()/100 > cutdown_altitude ) {
-            digitalWrite(cutdown_pin, HIGH);
             Serial.println("B");
+            digitalWrite(cutdown_pin, HIGH);
+	    delay(cutdown_delay);
+            digitalWrite(cutdown_pin, LOW);
           }
         }
         
@@ -457,8 +460,10 @@ uart_gps.end();
            } else if (menuopt == 4) {  
              // Cutdown initiated!
              recognised_selection = 1;             
-             Serial.println("B");  // Indicates more of a normal phase.             
+             Serial.println("B");  // Indicates cutdown received.
              digitalWrite(cutdown_pin, HIGH);
+	     delay(cutdown_delay);
+             digitalWrite(cutdown_pin, LOW);
              EndFlag = 1;
            } else if (menuopt == 9) {  
              Serial.println("K");  // Indicates we exit the menu
