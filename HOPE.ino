@@ -42,8 +42,8 @@ const short gps_tx = 3;
 const short status_led = 5;
 
 const short cutdown_pin =6;
-const long cutdown_altitude = 25000;
-const long cutdown_delay = 10000;
+const long cutdown_altitude = 30000; // Cutdown when we reach 30km up
+const long cutdown_delay = 10000; // 10 Seconds of heat element to cutdown
 
 const short tmp_data_pin = 9;
 
