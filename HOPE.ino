@@ -136,7 +136,7 @@ void setup()
   delay(4000); 
   
   // Initialise the Radio Serial Port
-  Serial.begin(9600);
+  Serial.begin(57600);
   
   // Wait another 3 seconds for the Serial modem to initialise...
   delay(3000);   
