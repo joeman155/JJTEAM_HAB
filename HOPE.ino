@@ -42,8 +42,9 @@ const short gps_tx = 3;
 const short status_led = 5;
 
 const short cutdown_pin =6;
-const long cutdown_altitude = 30000; // Cutdown when we reach 30km up
+const long cutdown_altitude = 27000; // Cutdown when we reach 30km up
 const long cutdown_delay = 10000; // 10 Seconds of heat element to cutdown
+const long menu_delay = 3000; // 3 seconds we wait
 
 const short tmp_data_pin = 9;
 
@@ -421,7 +422,7 @@ uart_gps.end();
      while(!EndFlag) {
        
        // If we exceed time limit...exit.
-        if (millis() > ulCur + 10000) {
+        if (millis() > ulCur + menu_delay) {
           // If not selection...pass output back to GroundStation
           if (recognised_selection == 0) {
               Serial.println("W");
