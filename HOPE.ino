@@ -44,7 +44,7 @@ const short status_led = 5;
 const short cutdown_pin =6;
 const long cutdown_altitude = 27000; // Cutdown when we reach 30km up
 const long cutdown_delay = 10000; // 10 Seconds of heat element to cutdown
-const long menu_delay = 3000; // 3 seconds we wait
+const long menu_delay = 10000; // 3 seconds we wait
 
 const short tmp_data_pin = 9;
 
@@ -406,7 +406,6 @@ uart_gps.end();
 
 
      // Menu.
-     ulCur = millis();
      Serial.print("T:"); Serial.println(ulCur);
      if (picture_taken == true) {
        Serial.println("UI");   // Means option 2 is available - to download an image
@@ -418,6 +417,7 @@ uart_gps.end();
      
      EndFlag = 0;
      recognised_selection = 0;
+     ulCur = millis();
         
      while(!EndFlag) {
        
