@@ -238,7 +238,8 @@ void loop()
         Serial.print(minute, DEC); Serial.print(":"); Serial.print(second, DEC); 
         Serial.print("."); Serial.print(hundredths, DEC);
 	Serial.print(",S:"); Serial.print(speed, DEC);
-	Serial.print(",C:"); Serial.println(course, DEC);
+	Serial.print(",C:"); Serial.print(course, DEC);
+        Serial.print(",Sa:"); Serial.println(gps.satellites());
         
         delay(1000);
         
