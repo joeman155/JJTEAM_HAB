@@ -28,24 +28,26 @@
 // --------------------
 // Digital pin assignments
 
-// We want to use Hardware serial port so that we get more reliably radio communications
-// i.e. only xbees and antennas to contend with...not serial buffers!!
-const short xbee_rx = 0;
-const short xbee_tx = 1;
+// Radio Modem uses 0,1, but no need to declare
 
+// Camera
 const short ls_rx = 8;
 const short ls_tx = 7;
 
+// GPS
 const short gps_rx = 2;
 const short gps_tx = 3;
 
+// LED status
 const short status_led = 5;
 
+// Cutdown pin and other cutdown configuration
 const short cutdown_pin =6;
 const long cutdown_altitude = 27000; // Cutdown when we reach 30km up
 const long cutdown_delay = 10000; // 10 Seconds of heat element to cutdown
 const long menu_delay = 10000; // 3 seconds we wait
 
+// External Temperature sensor pin
 const short tmp_data_pin = 9;
 
 // All I2C is through A4 and A5, but for the rtc, we specify it for this board
