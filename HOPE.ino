@@ -1,18 +1,22 @@
 /*
  * Name:  HOPE
  * Author: Joseph Turner <joeman@leederville.net>
- * Short Description: To operate arduino controller on the High Altitude Balloon and all the
-                      gadgets installed.
-             * Xbee Serial modems
-             * Temperature sensor
-             * RTC 
-             * Accelometer
-             * GPS
-             * LinkSprite Camera
-             * SD card (older style...not SDHC) < 2GB absolutely required.
-          
-*
-*/
+ * Short Description: To operate arduino controller on the High Altitude Balloon and all the gadgets installed.
+ *
+ * Gadgets installed are:-
+ * - RFD900 Serial modems
+ * - Temperature sensor
+ * - RTC 
+ * - Cutdown mechanism
+ * - GPS
+ * - LinkSprite Camera
+ * - SD card (older style...not SDHC) < 2GB absolutely required.
+ *
+ * Dependancies: 
+ * - xmodem.c
+ * - xmodem.h
+ *
+ */
 
 
 // Load includes
